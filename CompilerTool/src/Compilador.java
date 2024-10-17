@@ -58,7 +58,7 @@ public class Compilador extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         setTitle(title);
         directorio = new Directory(this, jtpCode, title, ".java");
-        addWindowListener(new WindowAdapter() {// Cuando presiona la "X" de la esquina superior derecha
+        addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
                 directorio.Exit();
