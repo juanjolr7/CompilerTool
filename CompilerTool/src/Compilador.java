@@ -202,7 +202,7 @@ public class Compilador extends javax.swing.JFrame {
         clearFields();
         lexicalAnalysis();
         fillTableTokens();
-       // syntacticAnalysis();
+        syntacticAnalysis();
        // semanticAnalysis();
         printConsole();
         codeHasBeenCompiled = true;
@@ -231,7 +231,20 @@ public class Compilador extends javax.swing.JFrame {
             System.out.println("Error al escribir en el archivo... " + ex.getMessage());
         }
     }
+    private void syntacticAnalysis() {
+        Grammar gramatica = new Grammar(tokens, errors);
+        gramatica.delete(new String[]{"ERROR"}, 1);
+        
 
+        //Declaración de Variables
+//        gramatica.group("VARIABLE_ENTERA","PALABRA_RESERVADA:INT IDENTIFICADOR DELIMITADOR:PUNTO_COMA",true);
+          gramatica.group("VARIABLE_ENTERA","PALABRA_RESERVADA:INT IDENTIFICADOR OPERADOR_ASIGNACION:ASIGNACION_SIMPLE NUMERO DELIMITADOR:PUNTO_COMA",true);
+//        //Errores
+//        gramatica.group("VARIABLE_ENTERA","PALABRA_RESERVADA:INT IDENTIFICADOR",true,2
+//        ,"error sintáctico: falta el delimitador ; [#,%]");
+        
+        gramatica.show();
+    }
    
 
  
@@ -240,7 +253,12 @@ public class Compilador extends javax.swing.JFrame {
     private void fillTableTokens() {
         tokens.forEach(token -> {
             Object[] data = new Object[]{token.getLexicalComp(), token.getLexeme(), "[" + token.getLine() + ", " + token.getColumn() + "]"};
+            
+            if(!token.getLexeme().equals("OPERADOR_ARITMETICO")&&!token.getLexeme().equals("OPERADOR_RELACIONAL")&&
+                   !token.getLexeme().equals("OPERADOR_LOGICO") && !token.getLexeme().equals("OPERADOR_ASIGNACION")&&
+                    !token.getLexeme().equals("DELIMITADOR")){
             Functions.addRowDataInTable(tblTokens, data);
+            }
         });
     }
 

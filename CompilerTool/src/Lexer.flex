@@ -209,6 +209,8 @@ Delimitador = {puntoComa} | {coma} | {punto} | {parentesisApertura} | {parentesi
 {incremento}      { return token(yytext(), "OPERADOR_ARITMETICO:INCREMENTO", yyline, yycolumn); }
 {decremento}      { return token(yytext(), "OPERADOR_ARITMETICO:DECREMENTO", yyline, yycolumn); }
 
+{OperadorAritmetico} { return token(yytext(), "OPERADOR_ARITMETICO", yyline, yycolumn); }
+
 {igual}        { return token(yytext(), "OPERADOR_RELACIONAL:IGUAL", yyline, yycolumn); }
 {diferente}    { return token(yytext(), "OPERADOR_RELACIONAL:DIFERENTE", yyline, yycolumn); }
 {menor}        { return token(yytext(), "OPERADOR_RELACIONAL:MENOR", yyline, yycolumn); }
@@ -216,9 +218,13 @@ Delimitador = {puntoComa} | {coma} | {punto} | {parentesisApertura} | {parentesi
 {mayor}        { return token(yytext(), "OPERADOR_RELACIONAL:MAYOR", yyline, yycolumn); }
 {mayorIgual}   { return token(yytext(), "OPERADOR_RELACIONAL:MAYOR_IGUAL", yyline, yycolumn); }
 
+{OperadorRelacional} { return token(yytext(), "OPERADOR_RELACIONAL", yyline, yycolumn); }
+
 {andLogico}    { return token(yytext(), "OPERADOR_LOGICO:AND", yyline, yycolumn); }
 {orLogico}     { return token(yytext(), "OPERADOR_LOGICO:OR", yyline, yycolumn); }
 {notIgual}     { return token(yytext(), "OPERADOR_LOGICO:NOT_IGUAL", yyline, yycolumn); }
+
+{OperadorLogico} { return token(yytext(), "OPERADOR_LOGICO", yyline, yycolumn); }
 
 {asignacionSimple}          { return token(yytext(), "OPERADOR_ASIGNACION:ASIGNACION_SIMPLE", yyline, yycolumn); }
 {asignacionSuma}            { return token(yytext(), "OPERADOR_ASIGNACION:ASIGNACION_SUMA", yyline, yycolumn); }
@@ -227,6 +233,7 @@ Delimitador = {puntoComa} | {coma} | {punto} | {parentesisApertura} | {parentesi
 {asignacionDivision}        { return token(yytext(), "OPERADOR_ASIGNACION:ASIGNACION_DIVISION", yyline, yycolumn); }
 {asignacionModulo}          { return token(yytext(), "OPERADOR_ASIGNACION:ASIGNACION_MODULO", yyline, yycolumn); }
 
+{OperadorAsignacion} { return token(yytext(), "OPERADOR_ASIGNACION", yyline, yycolumn); }
 
 /* Delimitadores */
 {puntoComa}          { return token(yytext(), "DELIMITADOR:PUNTO_COMA", yyline, yycolumn); }
@@ -239,6 +246,7 @@ Delimitador = {puntoComa} | {coma} | {punto} | {parentesisApertura} | {parentesi
 {corcheteApertura}   { return token(yytext(), "DELIMITADOR:CORCHETE_APERTURA", yyline, yycolumn); }
 {corcheteCierre}     { return token(yytext(), "DELIMITADOR:CORCHETE_CIERRE", yyline, yycolumn); }
 
+{Delimitador} { return token(yytext(), "DELIMITADOR", yyline, yycolumn); }
 
 /* Errores */
 . { return token(yytext(), "ERROR", yyline, yycolumn); }
