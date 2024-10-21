@@ -1,1 +1,12 @@
-int x = 5;
+public static void main(){
+
+int a=8;
+
+if(a%2==0){
+System.out.println("Par");
+}else{
+System.out.println("Impar");
+
+}
+
+}

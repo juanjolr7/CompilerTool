@@ -232,18 +232,129 @@ public class Compilador extends javax.swing.JFrame {
         }
     }
     private void syntacticAnalysis() {
-        Grammar gramatica = new Grammar(tokens, errors);
-        gramatica.delete(new String[]{"ERROR"}, 1);
+        Grammar g= new Grammar(tokens,errors);
+        g.disableMessages();
+        g.disableValidations();
+        g.delete(new String[]{"ERROR"},1);
         
-
-        //Declaración de Variables
-//        gramatica.group("VARIABLE_ENTERA","PALABRA_RESERVADA:INT IDENTIFICADOR DELIMITADOR:PUNTO_COMA",true);
-          gramatica.group("VARIABLE_ENTERA","PALABRA_RESERVADA:INT IDENTIFICADOR OPERADOR_ASIGNACION:ASIGNACION_SIMPLE NUMERO DELIMITADOR:PUNTO_COMA",true);
-//        //Errores
-//        gramatica.group("VARIABLE_ENTERA","PALABRA_RESERVADA:INT IDENTIFICADOR",true,2
-//        ,"error sintáctico: falta el delimitador ; [#,%]");
+        g.group("OPERADORARITMETICO","(SUMA | RESTA | MULTIPLICACION | DIVISION | MODULO)");
+        g.group("OPERADORELACIONAL", "(IGUAL | NOTIGUAL | DIFERENTE | MENOR | MENORIGUAL | MAYOR | MAYORIGUAL)");
+        g.group("INCDEC", "(INCREMENTO | DECREMENTO)");
+        g.group("TIPODATO","(BOOLEAN | DOUBLE | INT | SHORT | CHAR | LONG | FLOAT | STRING | VOID)");
+        g.group("OPERADORLOGICO", "(AND | OR)");
+        g.group("MODACCESO", "(PUBLIC | PROTECTED | PRIVATE)");
+        //g.group("TCLASS","(INTERFACE)");
+        // g.group("TMETHOD","(STATIC | ABSTRACT)");
+        g.group("OPASIG", "(ASIGNACIONSIMPLE | ASIGNACIONSUMA | ASIGNACIONRESTA | ASIGNACONMULTIPLICACION | ASIGNACIONDIVISION | ASIGNACIONMODULO)");
         
-        gramatica.show();
+        //valores
+        g.group("VALOR", "(NUMERO | NUMERODECIMAL | TEXTO | CARACTER | TRUE | FALSE)");
+        
+        //Expresiones Ariteticas
+       
+        
+        g.loopForFunExecUntilChangeNotDetected(()->{
+                g.group("EXP_ARITMETICA", "(VALOR | IDENTIFICADOR) (OPERADORARITMETICO (VALOR | IDENTIFICADOR))+");
+                g.group("EXP_ARITMETICA", "(EXP_ARITMETICA) (OPERADORARITMETICO (EXP_ARITMETICA))+");
+               // g.group("EXP_ARITMETICA","PARENTESISAPERTURA (EXP_ARITMETICA | VALOR | IDENTIFICADOR) PARENTESISCIERRE",true);
+       }); 
+        
+        g.group("EXP_ARITMETICA","IDENTIFICADOR (INCREMENTO | DECREMENTO)",true);
+        //Expresiones Logicas
+  
+       
+       g.loopForFunExecUntilChangeNotDetected(()->{
+            g.group("EXP_LOGICA","(VALOR | IDENTIFICADOR | EXP_ARITMETICA) (OPERADORELACIONAL (VALOR | IDENTIFICADOR | EXP_ARITMETICA))+");
+           g.group("EXP_LOGICA", "(EXP_LOGICA) (OPERADORLOGICO (EXP_LOGICA))+");
+           //g.group("EXP_LOGICA","PARENTESISAPERTURA (EXP_LOGICA | VALOR | IDENTIFICADOR) PARENTESISCIERRE",true);
+       });
+        
+        g.group("VARIABLE","TIPODATO (STATIC)? IDENTIFICADOR OPASIG (VALOR | IDENTIFICADOR | EXP_ARITMETICA) PUNTOCOMA",true);
+        g.group("VARIABLE","TIPODATO (STATIC)? IDENTIFICADOR PUNTOCOMA",true);
+        //Errores
+        g.group("VARIABLE","TIPODATO (STATIC)? IDENTIFICADOR OPASIG (VALOR | IDENTIFICADOR | EXP_ARITMETICA)",true,2,
+                "Error Sintactico {}: falta ; [#,%]");
+        g.group("VARIABLE","TIPODATO (STATIC)? IDENTIFICADOR OPASIG",true,2,
+                "Error Sintactico {}: no se esta asignando nada [#,%]");
+//        g.group("VARIABLE","TIPODATO (STATIC)? IDENTIFICADOR",true,2,
+//                "Error Sintactico {}: falta ; [#,%]");
+         //Asignación de operaciones 
+        g.group("ASIG_VALOR","IDENTIFICADOR OPASIG (EXP_ARITMETICA | IDENTIFICADOR) PUNTOCOMA",true);
+        //Errores
+        g.group("ASIG_VALOR","IDENTIFICADOR OPASIG (EXP_ARITMETICA | IDENTIFICADOR)",true,16,
+                "error sintáctico {}: falta el delimitador ; [#,%]");
+        g.group("ASIG_VALOR","IDENTIFICADOR OPASIG",true,16,
+                "error sintáctico {}: falta el valor a asignar [#,%]");
+        g.group("ASIG_VALOR","OPASIG (EXP_ARITMETICA | IDENTIFICADOR)",true,16,
+                "error sintáctico {}: falta el identificador [#,%]");
+        
+        //Impresion
+        //Impresion
+        g.group("IMPRESION","SYSTEM PUNTO OUT PUNTO (PRINT | PRINTLN) PARENTESISAPERTURA (VALOR | IDENTIFICADOR)? PARENTESISCIERRE PUNTOCOMA",true);
+        g.group("IMPRESION","SYSTEM OUT PUNTO (PRINT | PRINTLN) PARENTESISAPERTURA (VALOR | IDENTIFICADOR)? PARENTESISCIERRE PUNTOCOMA",true,20
+        ,"error sintactico {}: falta .");
+        g.group("IMPRESION","SYSTEM PUNTO OUT (PRINT | PRINTLN) PARENTESISAPERTURA (VALOR | IDENTIFICADOR)? PARENTESISCIERRE PUNTOCOMA",true,20
+        ,"error sintactico {}: falta .");
+        g.group("IMPRESION","SYSTEM PUNTO OUT PUNTO (PRINT | PRINTLN) PARENTESISAPERTURA (VALOR | IDENTIFICADOR)? PARENTESISCIERRE",true,20
+        ,"error sintactico {}: falta el delimitador ;");
+        g.group("IMPRESION","SYSTEM PUNTO OUT PUNTO (PRINT | PRINTLN) (VALOR | IDENTIFICADOR)? PARENTESISCIERRE PUNTOCOMA",true,20
+        ,"error sintactico {}: falta parentesis de apertura");
+        g.group("IMPRESION","SYSTEM PUNTO OUT PUNTO (PRINT | PRINTLN) PARENTESISAPERTURA (VALOR | IDENTIFICADOR)? PUNTOCOMA",true,20
+        ,"error sintactico {}: falta parentesis de cierre");
+        //Estructura if else
+        g.group("EST_IF","IF PARENTESISAPERTURA (VALOR | EXP_LOGICA | IDENTIFICADOR)? PARENTESISCIERRE",true);
+        g.group("EST_IF","IF (VALOR | EXP_LOGICA | IDENTIFICADOR)? PARENTESISCIERRE",true,7,""
+                + "Error sintactico {}: falta parentesis apertura [#,%]");
+        g.group("EST_IF","IF PARENTESISAPERTURA (VALOR | EXP_LOGICA | IDENTIFICADOR)?",true,7,""
+                + "Error sintactico {}: falta parentesis cierre [#,%]");
+       
+        g.group("EST_IF_C","EST_IF LLAVEAPERTURA ((ASIG_VALOR | IMPRESION | VARIABLE)+)? LLAVECIERRE"
+                + "(ELSE LLAVEAPERTURA ((ASIG_VALOR | IMPRESION | VARIABLE)+)? LLAVECIERRE)?");
+        
+        //Erroes
+         g.group("EST_IF_C","EST_IF",true,13,"Error Sintactico {}: falta { en el if [#,%]");
+         g.group("EST_IF_C","EST_IF LLAVEAPERTURA ((ASIG_VALOR | IMPRESION | VARIABLE)+)?"
+                + "(ELSE LLAVEAPERTURA ((ASIG_VALOR | IMPRESION | VARIABLE)+)? LLAVECIERRE)?",true,13,"Error Sintactico {}: falta { en el if [#,%]");
+         g.group("EST_IF_C","EST_IF LLAVEAPERTURA ((ASIG_VALOR | IMPRESION | VARIABLE)+)? LLAVECIERRE"
+                + "(ELSE)?",true,13,"Error Sintactico {}: falta { en el else [#,%]");
+         g.group("EST_IF_C","EST_IF LLAVEAPERTURA ((ASIG_VALOR | IMPRESION | VARIABLE)+)? LLAVECIERRE"
+                + "(ELSE LLAVEAPERTURA ((ASIG_VALOR | IMPRESION | VARIABLE)+)?)?",true,13,"Error Sintactico {}: falta } en el else [#,%]");
+       // g.group("PARAMETROS", "TIPODATO (CORCHETEAPERTURA CORCHETECIERRE)? IDENTIFICADOR");
+      //   g.group("PARAMETROS", "TIPODATO (CORCHETEAPERTURA CORCHETECIERRE)? IDENTIFICADOR (COMA TIPODATO (CORCHETEAPERTURA CORCHETECIERRE)? IDENTIFICADOR)*");
+//        g.group("FUNCION","MODACCESO (STATIC | INTERFACE | ABSTRACT)? TIPODATO IDENTIFICADOR"
+//                 + "PARENTESISAPERTURA ("
+//                + "TIPODATO (CORCHETEAPERTURA CORCHETECIERRE)? IDENTIFICADOR (COMA TIPODATO (CORCHETEAPERTURA CORCHETECIERRE)? IDENTIFICADOR)*"
+//                + ")? PARENTESISCIERRE LLAVEAPERTURA (EST_IF_C"
+//                + " | VARIABLES | ASIG_VALOR | IMPRESION)* LLAVECIERRE");
+          g.group("ATRIBUTO","MODACCESO VARIABLE");
+         g.group("FUNCION","MODACCESO (STATIC | INTERFACE | ABSTRACT)? TIPODATO IDENTIFICADOR"
+                 + " PARENTESISAPERTURA (TIPODATO (CORCHETEAPERTURA CORCHETECIERRE)? IDENTIFICADOR (COMA TIPODATO (CORCHETEAPERTURA CORCHETECIERRE)? IDENTIFICADOR)*)? PARENTESISCIERRE LLAVEAPERTURA (EST_IF_C"
+                 + " | VARIABLE | ASIG_VALOR | IMPRESION)* LLAVECIERRE");
+       //Errores
+            g.group("FUNCION","MODACCESO (STATIC | INTERFACE | ABSTRACT)? TIPODATO IDENTIFICADOR"
+                 + " PARENTESISAPERTURA (TIPODATO (CORCHETEAPERTURA CORCHETECIERRE)? IDENTIFICADOR (COMA TIPODATO (CORCHETEAPERTURA CORCHETECIERRE)? IDENTIFICADOR)*)? PARENTESISCIERRE LLAVEAPERTURA (EST_IF_C"
+                 + " | VARIABLE | ASIG_VALOR | IMPRESION)*",true,11,""
+                         + "Error sintactico{}: falta } en la funcion [#,%]");
+            g.group("FUNCION","MODACCESO (STATIC | INTERFACE | ABSTRACT)? TIPODATO IDENTIFICADOR"
+                 + " PARENTESISAPERTURA (TIPODATO (CORCHETEAPERTURA CORCHETECIERRE)? IDENTIFICADOR (COMA TIPODATO (CORCHETEAPERTURA CORCHETECIERRE)? IDENTIFICADOR)*)? PARENTESISCIERRE (EST_IF_C"
+                 + " | VARIABLE | ASIG_VALOR | IMPRESION)* LLAVECIERRE",true,11,""
+                         + "Error sintactico{}: falta { en la funcion [#,%]");
+            g.group("FUNCION","MODACCESO (STATIC | INTERFACE | ABSTRACT)? TIPODATO IDENTIFICADOR"
+                 + " PARENTESISAPERTURA (TIPODATO (CORCHETEAPERTURA CORCHETECIERRE)? IDENTIFICADOR (COMA TIPODATO (CORCHETEAPERTURA CORCHETECIERRE)? IDENTIFICADOR)*)? PARENTESISCIERRE"
+                       ,true,11,""
+                         + "Error sintactico{}: falta { en la funcion [#,%]");
+        //Clases
+         g.group("CLASE","MODACCESO (INTERFACE | ABSTRACT)? CLASS IDENTIFICADOR LLAVEAPERTURA (FUNCION | ATRIBUTO)* LLAVECIERRE",true);
+        //Errores
+         g.group("CLASE","MODACCESO (INTERFACE | ABSTRACT)? CLASS IDENTIFICADOR (FUNCION | ATRIBUTO)* LLAVECIERRE",true,11,
+                 "Error sintactico {}: Falta { en la declaracion de clase");
+         g.group("CLASE","MODACCESO (INTERFACE | ABSTRACT)? CLASS IDENTIFICADOR LLAVEAPERTURA (FUNCION | ATRIBUTO)*",true,11,
+                 "Error sintactico {}: Falta } en la declaracion de clase");
+       g.delete("IF",10,"Error sintactico {}: Error al declarar if [#,%]");
+        g.delete("EST_IF",10,"Error sintactico {}: Error al declarar if [#,%]");
+        g.delete("PUNTOCOMA",4,"Error Sintactico{}: ; no esta al final de una sentencia [#,%]");
+        g.delete("OPASIG",5,"Error Sintactico{}: operador de asignacion no esta en una sentencia [#,%]");
+        g.show();
     }
    
 
@@ -254,8 +365,8 @@ public class Compilador extends javax.swing.JFrame {
         tokens.forEach(token -> {
             Object[] data = new Object[]{token.getLexicalComp(), token.getLexeme(), "[" + token.getLine() + ", " + token.getColumn() + "]"};
             
-            if(!token.getLexeme().equals("OPERADOR_ARITMETICO")&&!token.getLexeme().equals("OPERADOR_RELACIONAL")&&
-                   !token.getLexeme().equals("OPERADOR_LOGICO") && !token.getLexeme().equals("OPERADOR_ASIGNACION")&&
+            if(!token.getLexeme().equals("OPERADORARITMETICO")&&!token.getLexeme().equals("OPERADORRELACIONAL")&&
+                   !token.getLexeme().equals("OPERADORLOGICO") && !token.getLexeme().equals("OPERADORASIGNACION")&&
                     !token.getLexeme().equals("DELIMITADOR")){
             Functions.addRowDataInTable(tblTokens, data);
             }
