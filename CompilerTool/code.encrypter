@@ -1,8 +1,8 @@
-public static void main(){
+public static void main(String[] args){
 
 int a=8;
 
-if(a%2==0){
+if(A==0){
 System.out.println("Par");
 }else{
 System.out.println("Impar");
