@@ -1080,7 +1080,7 @@ class Lexer {
             // fall through
           case 118: break;
           case 22:
-            { return token(yytext(), "DIFERENTE", yyline, yycolumn);
+            { return token(yytext(), "NOTIGUAL", yyline, yycolumn);
             }
             // fall through
           case 119: break;

@@ -87,6 +87,8 @@ PalabraReservada = {abstract} | {assert} | {boolean} | {break} | {byte} | {case}
 
 /* Identificador */
 Identificador = {Letra}({Letra}|{Digito})*
+/* Caracter Especial para Funcion*/
+gato = "#"
 
 /* Número */
 Numero ="-"?[0-9]+
@@ -207,7 +209,8 @@ Delimitador = {puntoComa} | {coma} | {punto} | {parentesisApertura} | {parentesi
 
 /* Identificadores */
 {Identificador} { return token(yytext(), "IDENTIFICADOR", yyline, yycolumn); }
-
+/* CaracterEspecial */
+{gato} { return token(yytext(), "GATO", yyline, yycolumn); }
 /* Números */
 {Numero} { return token(yytext(), "NUMERO", yyline, yycolumn); }
 {NumeroF} { return token(yytext(), "NUMERODECIMAL", yyline, yycolumn); }
